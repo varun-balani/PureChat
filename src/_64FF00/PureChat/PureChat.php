@@ -6,6 +6,7 @@ use _64FF00\PureChat\factions\FactionsInterface;
 use _64FF00\PureChat\factions\FactionsProNew;
 use _64FF00\PureChat\factions\FactionsProOld;
 use _64FF00\PureChat\factions\XeviousPE_Factions;
+use _64FF00\PureChat\factions\PiggyFactions;
 
 use _64FF00\PurePerms\PPGroup;
 
@@ -383,6 +384,21 @@ class PureChat extends PluginBase
                     }
 
                     $this->getLogger()->notice("No valid factions plugin in default-factions-plugin node was found. Disabling factions plugin support.");
+
+                    break;
+
+                case "piggyfactions":
+
+                    if($this->getServer()->getPluginManager()->getPlugin("PiggyFactions") !== null)
+                    {
+                        $this->factionsAPI = new PiggyFactions();
+
+                        $this->getLogger()->notice("PiggyFactions support enabled.");
+
+                        break;
+                    }
+
+                    $this->getLogger()->notice("PiggyFactions was not found. Disabling factions plugin support.");
 
                     break;
 

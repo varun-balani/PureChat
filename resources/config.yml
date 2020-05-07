@@ -8,7 +8,7 @@
 version: "1.4.10-6"
 
 # Set default factions plugin for PureChat
-# - FactionsPro / null
+# - FactionsPro / null / PiggyFactions
 default-factions-plugin: FactionsPro
 
 # Enable this if you want to use per-world chat formats / per-world nametags for players
