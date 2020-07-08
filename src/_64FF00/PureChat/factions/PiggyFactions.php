@@ -15,7 +15,7 @@ class PiggyFactions implements FactionsInterface
 
     public function getPlayerFaction(Player $player)
     {
-        $member = $this->getAPI()->getPlayerManager()->getPlayer($player->getUniqueId());
+        $member = $this->getAPI()->getPlayerManager()->getPlayer($player);
         $faction = $member === null ? null : $member->getFaction();
         if($faction === null) {
             return "";
@@ -25,7 +25,7 @@ class PiggyFactions implements FactionsInterface
 
     public function getPlayerRank(Player $player)
     {
-        $member = $this->getAPI()->getPlayerManager()->getPlayer($player->getUniqueId());
+        $member = $this->getAPI()->getPlayerManager()->getPlayer($player);
         $symbol = $member === null ? null : $this->getAPI()->getTagManager()->getPlayerRankSymbol($member);
         if($member === null || $symbol === null) {
             return "";
