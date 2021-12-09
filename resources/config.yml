@@ -21,7 +21,13 @@ enable-multiworld-chat: false
 # &a: Green, &b: Aqua, &c: Red, &d: Light Purple, &e: Yellow, &f: White
 # &k: Obfuscated, &l: Bold, &m: Strikethrough, &n: Underline, &o: Italic, &r: Reset
 
-# Available PureChat tags: {display_name}, {msg}, {fac_name}, {fac_rank}, {prefix}, {suffix}, {world}
+# Available PureChat tags
+# {display_name} Get the player's username.
+# {msg} Get the player's message.
+# {prefix} Get PurePerms Prefix of the rank.
+# {suffix} Get the PurePerms Suffix of the rank.
+# {world} Get the PurePerms world the player is in.
+
 groups:
   Guest:
     chat: '&7[Guest] &f{fac_rank}{fac_name}&a {display_name} &7> &f{msg}'

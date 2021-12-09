@@ -1,6 +1,14 @@
-# General
+<p align="center">
+    <a href="https://github.com/Vecnavium/PureChat"><img src="https://github.com/Vecnavium/PureChat/blob/stable/863.png"></img></a><br>
+    <b>Provides custom chat formats based on PurePerms groups for your server.</b>
+</p>
 
-PureChat by 64FF00 is a plugin for PurePerms that provides custom chat format for server owners.
+<p align="center">
+    <img alt="GitHubrelease" src="https://img.shields.io/github/v/release/Vecnavium/PureChat?label=release&sort=semver">
+      <img alt="Stars" src= "https://img.shields.io/github/stars/Vecnavium/PureChat?style=for-the-badge">
+    <a href="https://discord.gg/6M9tGyWPjr"><img src="https://img.shields.io/discord/837701868649709568?label=discord&color=7289DA&logo=discord" alt="Discord" /></a>
+</p>
+
 
 # Commands
 
