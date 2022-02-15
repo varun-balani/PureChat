@@ -3,9 +3,9 @@ main: _64FF00\PureChat\PureChat
 version: 1.4.12
 api: [4.0.0]
 load: POSTWORLD
-author: [Vecnavium , 64FF00]
+authors: [Vecnavium, 64FF00]
 depend: [PurePerms]
-softdepend: [PiggyFactions, FactionsPro, XeviousPE-Factions]
+softdepend: [PiggyFactions]
 commands:
   setformat:
     description: "Allows you to set default chat format of a PurePerms group"
