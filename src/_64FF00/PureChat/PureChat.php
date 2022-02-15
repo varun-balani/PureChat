@@ -2,6 +2,7 @@
 
 namespace _64FF00\PureChat;
 
+use _64FF00\PureChat\factions\FactionsInterface;
 use _64FF00\PureChat\factions\PiggyFactions;
 
 use _64FF00\PurePerms\PPGroup;
@@ -12,37 +13,20 @@ use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 use pocketmine\utils\TextFormat;
-use pocketmine\world\World;
 
 class PureChat extends PluginBase
 {
-    /*
-        PureChat by 64FF00 (Twitter: @64FF00)
-
-          888  888    .d8888b.      d8888  8888888888 8888888888 .d8888b.   .d8888b.
-          888  888   d88P  Y88b    d8P888  888        888       d88P  Y88b d88P  Y88b
-        888888888888 888          d8P 888  888        888       888    888 888    888
-          888  888   888d888b.   d8P  888  8888888    8888888   888    888 888    888
-          888  888   888P "Y88b d88   888  888        888       888    888 888    888
-        888888888888 888    888 8888888888 888        888       888    888 888    888
-          888  888   Y88b  d88P       888  888        888       Y88b  d88P Y88b  d88P
-          888  888    "Y8888P"        888  888        888        "Y8888P"   "Y8888P"
-    */
-
     const MAIN_PREFIX = "\x5b\x50\x75\x72\x65\x43\x68\x61\x74\x3a\x36\x34\x46\x46\x30\x30\x5d";
 
     private Config $config;
-
-    private FactionsInterface $factionsAPI;
-
+    private ?FactionsInterface $factionsAPI;
     private PurePerms $purePerms;
 
     public function onLoad(): void
     {
         $this->saveDefaultConfig();
         $this->config = new Config($this->getDataFolder() . "config.yml", Config::YAML);
-        if(!$this->config->get("version"))
-        {
+        if (!$this->config->get("version")) {
             $version = $this->getDescription()->getVersion();
             $this->config->set("version", $version);
             $this->fixOldConfig();
@@ -52,7 +36,7 @@ class PureChat extends PluginBase
         assert($purePerms instanceof PurePerms);
         $this->purePerms = $purePerms;
     }
-    
+
     public function onEnable(): void
     {
         $this->loadFactionsPlugin();
@@ -60,38 +44,27 @@ class PureChat extends PluginBase
         $this->getServer()->getPluginManager()->registerEvents(new PCListener($this), $this);
     }
 
-    /**
-     * @param CommandSender $sender
-     * @param Command $cmd
-     * @param string $label
-     * @param array $args
-     */
-    public function onCommand(CommandSender $sender, Command $cmd, string $label, array $args) : bool{
-        switch(strtolower($cmd->getName()))
-        {
+    public function onCommand(CommandSender $sender, Command $command, string $label, array $args): bool
+    {
+        switch (strtolower($command->getName())) {
             case "setformat":
 
-                if(count($args) < 3)
-                {
+                if (count($args) < 3) {
                     $sender->sendMessage(TextFormat::GREEN . self::MAIN_PREFIX . " Usage: /setformat <group> <world> <format>");
                     return true;
                 }
 
                 $group = $this->purePerms->getGroup($args[0]);
 
-                if($group === null)
-                {
+                if ($group === null) {
                     $sender->sendMessage(TextFormat::RED . self::MAIN_PREFIX . " Group " . $args[0] . "does NOT exist.");
-
                     return true;
                 }
                 $WorldName = null;
-                if($args[1] !== "null" and $args[1] !== "global")
-                {
+                if ($args[1] !== "null" and $args[1] !== "global") {
                     $World = $this->getServer()->getWorldManager()->getWorldByName($args[1]);
                     if ($World === null) {
                         $sender->sendMessage(TextFormat::RED . self::MAIN_PREFIX . " Invalid World Name!");
-
                         return true;
                     }
 
@@ -105,41 +78,35 @@ class PureChat extends PluginBase
 
             case "setnametag":
 
-                if(count($args) < 3)
-                {
+                if (count($args) < 3) {
                     $sender->sendMessage(TextFormat::GREEN . self::MAIN_PREFIX . " Usage: /setnametag <group> <world> <format>");
-
                     return true;
                 }
 
                 $group = $this->purePerms->getGroup($args[0]);
 
-                if($group === null)
-                {
+                if ($group === null) {
                     $sender->sendMessage(TextFormat::RED . self::MAIN_PREFIX . " Group " . $args[0] . "does NOT exist.");
-
                     return true;
                 }
 
-                $levelName = null;
+                $WorldName = null;
 
-                if($args[1] !== "null" and $args[1] !== "global")
-                {
-                    /** @var \pocketmine\level\Level $level */
-                    $level = $this->getServer()->getLevelByName($args[1]);
+                if ($args[1] !== "null" and $args[1] !== "global") {
+                    $World = $this->getServer()->getWorldManager()->getWorldByName($args[1]);
 
-                    if ($level === null) {
+                    if ($World === null) {
                         $sender->sendMessage(TextFormat::RED . self::MAIN_PREFIX . " Invalid World Name!");
 
                         return true;
                     }
 
-                    $levelName = $level->getName();
+                    $WorldName = $World->getDisplayName();
                 }
 
                 $nameTag = implode(" ", array_slice($args, 2));
 
-                $this->setOriginalNametag($group, $nameTag, $levelName);
+                $this->setOriginalNametag($group, $nameTag, $WorldName);
 
                 $sender->sendMessage(TextFormat::GREEN . self::MAIN_PREFIX . " You set the nametag of the group to " . $nameTag . ".");
 
@@ -148,14 +115,12 @@ class PureChat extends PluginBase
 
             case "setprefix":
 
-                if(!$sender instanceof Player)
-                {
+                if (!$sender instanceof Player) {
                     $sender->sendMessage(TextFormat::GREEN . self::MAIN_PREFIX . " This command can be only used in-game.");
                     return true;
                 }
 
-                if(!isset($args[0]))
-                {
+                if (!isset($args[0])) {
                     $sender->sendMessage(TextFormat::GREEN . self::MAIN_PREFIX . " Usage: /setprefix <prefix>");
                     return true;
                 }
@@ -168,14 +133,12 @@ class PureChat extends PluginBase
 
             case "setsuffix":
 
-                if(!$sender instanceof Player)
-                {
+                if (!$sender instanceof Player) {
                     $sender->sendMessage(TextFormat::GREEN . self::MAIN_PREFIX . " This command can be only used in-game.");
                     return true;
                 }
 
-                if(!isset($args[0]))
-                {
+                if (!isset($args[0])) {
                     $sender->sendMessage(TextFormat::GREEN . self::MAIN_PREFIX . " Usage: /setsuffix <suffix>");
                     return true;
                 }
@@ -196,47 +159,36 @@ class PureChat extends PluginBase
         $version = $this->getDescription()->getVersion();
         $tempData["version"] = $version;
 
-        if(!isset($tempData["default-factions-plugin"]))
+        if (!isset($tempData["default-factions-plugin"]))
             $tempData["default-factions-plugin"] = null;
 
-        if(isset($tempData["enable-multiworld-support"]))
-        {
+        if (isset($tempData["enable-multiworld-support"])) {
             $tempData["enable-multiworld-chat"] = $tempData["enable-multiworld-support"];
-
             unset($tempData["enable-multiworld-support"]);
         }
 
-        if(isset($tempData["custom-no-fac-message"]))
-            unset($tempData["custom-no-fac-message"]);
+        if (isset($tempData["custom-no-fac-message"])) unset($tempData["custom-no-fac-message"]);
 
-        if(isset($tempData["groups"]))
-        {
-            foreach($tempData["groups"] as $groupName => $tempGroupData)
-            {
-                if(isset($tempGroupData["default-chat"]))
-                {
+        if (isset($tempData["groups"])) {
+            foreach ($tempData["groups"] as $groupName => $tempGroupData) {
+                if (isset($tempGroupData["default-chat"])) {
                     $tempGroupData["chat"] = $this->fixOldData($tempGroupData["default-chat"]);
                     unset($tempGroupData["default-chat"]);
                 }
 
-                if(isset($tempGroupData["default-nametag"]))
-                {
+                if (isset($tempGroupData["default-nametag"])) {
                     $tempGroupData["nametag"] = $this->fixOldData($tempGroupData["default-nametag"]);
                     unset($tempGroupData["default-nametag"]);
                 }
 
-                if(isset($tempGroupData["worlds"]))
-                {
-                    foreach($tempGroupData["worlds"] as $worldName => $worldData)
-                    {
-                        if(isset($worldData["default-chat"]))
-                        {
+                if (isset($tempGroupData["worlds"])) {
+                    foreach ($tempGroupData["worlds"] as $worldName => $worldData) {
+                        if (isset($worldData["default-chat"])) {
                             $worldData["chat"] = $this->fixOldData($worldData["default-chat"]);
                             unset($worldData["default-chat"]);
                         }
 
-                        if(isset($worldData["default-nametag"]))
-                        {
+                        if (isset($worldData["default-nametag"])) {
                             $worldData["nametag"] = $this->fixOldData($worldData["default-nametag"]);
                             unset($worldData["default-nametag"]);
                         }
@@ -291,76 +243,20 @@ class PureChat extends PluginBase
     {
         $factionsPluginName = $this->config->get("default-factions-plugin");
 
-        if($factionsPluginName === null)
-        {
+        if ($factionsPluginName === null) {
             $this->getLogger()->notice("No valid factions plugin in default-factions-plugin node was found. Disabling factions plugin support.");
-        }
-        else
-        {
-            switch(strtolower($factionsPluginName))
-            {
-                case "factionspro":
-
-                    $factionsPro = $this->getServer()->getPluginManager()->getPlugin("FactionsPro");
-
-                    if($factionsPro !== null)
-                    {
-                        if(version_compare($factionsPro->getDescription()->getVersion(), "1.4.0") === -1)
-                        {
-                            $this->factionsAPI = new FactionsProOld();
-
-                            $this->getLogger()->notice("FactionsPro < 1.4 support enabled.");
-
-                            break;
-                        }
-                        else
-                        {
-                            $this->factionsAPI = new FactionsProNew();
-
-                            $this->getLogger()->notice("FactionsPro >= 1.4 support enabled.");
-
-                            break;
-                        }
-                    }
-
-                    $this->getLogger()->notice("No valid factions plugin in default-factions-plugin node was found. Disabling factions plugin support.");
-
-                    break;
-
-                case "xeviouspe-factions":
-
-                    if($this->getServer()->getPluginManager()->getPlugin("XeviousPE-Factions") !== null)
-                    {
-                        $this->factionsAPI = new XeviousPE_Factions();
-
-                        $this->getLogger()->notice("XeviousPE-Factions support enabled.");
-
-                        break;
-                    }
-
-                    $this->getLogger()->notice("No valid factions plugin in default-factions-plugin node was found. Disabling factions plugin support.");
-
-                    break;
-
+        } else {
+            switch (strtolower($factionsPluginName)) {
                 case "piggyfactions":
-
-                    if($this->getServer()->getPluginManager()->getPlugin("PiggyFactions") !== null)
-                    {
+                    if ($this->getServer()->getPluginManager()->getPlugin("PiggyFactions") !== null) {
                         $this->factionsAPI = new PiggyFactions();
-
                         $this->getLogger()->notice("PiggyFactions support enabled.");
-
                         break;
                     }
-
                     $this->getLogger()->notice("PiggyFactions was not found. Disabling factions plugin support.");
-
                     break;
-
                 default:
-
                     $this->getLogger()->notice("No valid factions plugin in default-factions-plugin node was found. Disabling factions plugin support.");
-
                     break;
             }
         }
@@ -386,24 +282,18 @@ class PureChat extends PluginBase
     {
         // TODO
         $string = str_replace("{display_name}", $player->getDisplayName(), $string);
-        if($message === null)
+        if ($message === null)
             $message = "";
-        if($player->hasPermission("pchat.coloredMessages"))
-        {
+        if ($player->hasPermission("pchat.coloredMessages")) {
             $string = str_replace("{msg}", $this->applyColors($message), $string);
-        }
-        else
-        {
+        } else {
             $string = str_replace("{msg}", $this->stripColors($message), $string);
         }
 
-        if($this->factionsAPI !== null)
-        {
+        if ($this->factionsAPI) {
             $string = str_replace("{fac_name}", $this->factionsAPI->getPlayerFaction($player), $string);
             $string = str_replace("{fac_rank}", $this->factionsAPI->getPlayerRank($player), $string);
-        }
-        else
-        {
+        } else {
             $string = str_replace("{fac_name}", '', $string);
             $string = str_replace("{fac_rank}", '', $string);
         }
@@ -431,13 +321,11 @@ class PureChat extends PluginBase
 
     public function getOriginalChatFormat(Player $player, ?string $WorldName = null): string
     {
-        /** @var \_64FF00\PurePerms\PPGroup $group */
+        /** @var PPGroup $group */
         $group = $this->purePerms->getUserDataMgr()->getGroup($player, $WorldName);
-        if($WorldName === null)
-        {
-        	$originalChatFormat = $this->config->getNested("groups." . $group->getName() . ".chat");
-            if(!is_string($originalChatFormat))
-            {
+        if ($WorldName === null) {
+            $originalChatFormat = $this->config->getNested("groups." . $group->getName() . ".chat");
+            if (!is_string($originalChatFormat)) {
                 $this->getLogger()->critical("Invalid chat format found in config.yml (Group: " . $group->getName() . ") / Setting it to default value.");
                 $this->config->setNested("groups." . $group->getName() . ".chat", $originalChatFormat = "&8&l[" . $group->getName() . "]&f&r {display_name} &7> {msg}");
                 $this->config->save();
@@ -445,12 +333,9 @@ class PureChat extends PluginBase
             }
 
             return $originalChatFormat;
-        }
-        else
-        {
-        	$originalChatFormat = $this->config->getNested("groups." . $group->getName() . "worlds.$WorldName.chat");
-            if(!is_string($originalChatFormat))
-            {
+        } else {
+            $originalChatFormat = $this->config->getNested("groups." . $group->getName() . "worlds.$WorldName.chat");
+            if (!is_string($originalChatFormat)) {
                 $this->getLogger()->critical("Invalid chat format found in config.yml (Group: " . $group->getName() . ", WorldName = $WorldName) / Setting it to default value.");
                 $this->config->setNested("groups." . $group->getName() . "worlds.$WorldName.chat", $originalChatFormat = "&8&l[" . $group->getName() . "]&f&r {display_name} &7> {msg}");
                 $this->config->save();
@@ -463,25 +348,20 @@ class PureChat extends PluginBase
 
     public function getOriginalNametag(Player $player, ?string $WorldName = null): string
     {
-        /** @var \_64FF00\PurePerms\PPGroup $group */
+        /** @var PPGroup $group */
         $group = $this->purePerms->getUserDataMgr()->getGroup($player, $WorldName);
-        if($WorldName === null)
-        {
-        	$originalNametag = $this->config->getNested("groups." . $group->getName() . ".nametag");
-            if(!is_string($originalNametag))
-            {
+        if ($WorldName === null) {
+            $originalNametag = $this->config->getNested("groups." . $group->getName() . ".nametag");
+            if (!is_string($originalNametag)) {
                 $this->getLogger()->critical("Invalid nametag found in config.yml (Group: " . $group->getName() . ") / Setting it to default value.");
                 $this->config->setNested("groups." . $group->getName() . ".nametag", $originalNametag = "&8&l[" . $group->getName() . "]&f&r {display_name}");
                 $this->config->save();
                 $this->config->reload();
             }
             return $originalNametag;
-        }
-        else
-        {
-        	$originalNametag = $this->config->getNested("groups." . $group->getName() . "worlds.$WorldName.nametag");
-            if(!is_string(($originalNametag)))
-            {
+        } else {
+            $originalNametag = $this->config->getNested("groups." . $group->getName() . "worlds.$WorldName.nametag");
+            if (!is_string(($originalNametag))) {
                 $this->getLogger()->critical("Invalid nametag found in config.yml (Group: " . $group->getName() . ", WorldName = $WorldName) / Setting it to default value.");
                 $this->config->setNested("groups." . $group->getName() . "worlds.$WorldName.nametag", $originalNametag = "&8&l[" . $group->getName() . "]&f&r {display_name}");
                 $this->config->save();
@@ -493,15 +373,12 @@ class PureChat extends PluginBase
 
     public function getPrefix(Player $player, ?string $WorldName = null): string
     {
-        if($WorldName === null)
-        {
-        	$prefix = $this->purePerms->getUserDataMgr()->getNode($player, "prefix");
+        if ($WorldName === null) {
+            $prefix = $this->purePerms->getUserDataMgr()->getNode($player, "prefix");
             return is_string($prefix) ? $prefix : '';
-        }
-        else
-        {
+        } else {
             $worldData = $this->purePerms->getUserDataMgr()->getWorldData($player, $WorldName);
-            if(!isset($worldData["prefix"]) || !is_string($worldData["prefix"]))
+            if (!isset($worldData["prefix"]) || !is_string($worldData["prefix"]))
                 return "";
             return $worldData["prefix"];
         }
@@ -509,16 +386,13 @@ class PureChat extends PluginBase
 
     public function getSuffix(Player $player, ?string $WorldName = null): string
     {
-        if($WorldName === null)
-        {
-        	$suffix = $this->purePerms->getUserDataMgr()->getNode($player, "suffix");
+        if ($WorldName === null) {
+            $suffix = $this->purePerms->getUserDataMgr()->getNode($player, "suffix");
             return is_string($suffix) ? $suffix : '';
-        }
-        else
-        {
+        } else {
             $worldData = $this->purePerms->getUserDataMgr()->getWorldData($player, $WorldName);
 
-            if(!isset($worldData["suffix"]) || !is_string($worldData["suffix"]))
+            if (!isset($worldData["suffix"]) || !is_string($worldData["suffix"]))
                 return "";
             return $worldData["suffix"];
         }
@@ -526,12 +400,9 @@ class PureChat extends PluginBase
 
     public function setOriginalChatFormat(PPGroup $group, string $chatFormat, ?string $WorldName = null): bool
     {
-        if($WorldName === null)
-        {
+        if ($WorldName === null) {
             $this->config->setNested("groups." . $group->getName() . ".chat", $chatFormat);
-        }
-        else
-        {
+        } else {
             $this->config->setNested("groups." . $group->getName() . "worlds.$WorldName.chat", $chatFormat);
         }
         $this->config->save();
@@ -541,12 +412,9 @@ class PureChat extends PluginBase
 
     public function setOriginalNametag(PPGroup $group, string $nameTag, ?string $WorldName = null): bool
     {
-        if($WorldName === null)
-        {
+        if ($WorldName === null) {
             $this->config->setNested("groups." . $group->getName() . ".nametag", $nameTag);
-        }
-        else
-        {
+        } else {
             $this->config->setNested("groups." . $group->getName() . "worlds.$WorldName.nametag", $nameTag);
         }
         $this->config->save();
@@ -556,12 +424,9 @@ class PureChat extends PluginBase
 
     public function setPrefix(string $prefix, Player $player, ?string $WorldName = null): bool
     {
-        if($WorldName === null)
-        {
+        if ($WorldName === null) {
             $this->purePerms->getUserDataMgr()->setNode($player, "prefix", $prefix);
-        }
-        else
-        {
+        } else {
             $worldData = $this->purePerms->getUserDataMgr()->getWorldData($player, $WorldName);
             $worldData["prefix"] = $prefix;
             $this->purePerms->getUserDataMgr()->setWorldData($player, $WorldName, $worldData);
@@ -572,12 +437,9 @@ class PureChat extends PluginBase
 
     public function setSuffix(string $suffix, Player $player, ?string $WorldName = null): bool
     {
-        if($WorldName === null)
-        {
+        if ($WorldName === null) {
             $this->purePerms->getUserDataMgr()->setNode($player, "suffix", $suffix);
-        }
-        else
-        {
+        } else {
             $worldData = $this->purePerms->getUserDataMgr()->getWorldData($player, $WorldName);
             $worldData["suffix"] = $suffix;
             $this->purePerms->getUserDataMgr()->setWorldData($player, $WorldName, $worldData);

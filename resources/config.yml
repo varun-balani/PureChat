@@ -8,8 +8,8 @@
 version: "1.4.10-6"
 
 # Set default factions plugin for PureChat
-# - FactionsPro / null / PiggyFactions
-default-factions-plugin: FactionsPro
+# - PiggyFactions / null
+default-factions-plugin: PiggyFactions
 
 # Enable this if you want to use per-world chat formats / per-world nametags for players
 # - true / false
@@ -27,6 +27,8 @@ enable-multiworld-chat: false
 # {prefix} Get PurePerms Prefix of the rank.
 # {suffix} Get the PurePerms Suffix of the rank.
 # {world} Get the PurePerms world the player is in.
+# {fac_rank} Get the player's faction rank.
+# {fac_name} Get the player's faction name.
 
 groups:
   Guest:
