@@ -3,7 +3,7 @@ This fork of PureChat is made specifically for PiggyFactions.
 
 ## Links
 - PiggyFactions: [click here](https://poggit.pmmp.io/p/PiggyFactions)
-- PurePerms: [click here](https://poggit.pmmp.io/p/PureChat)
+- PurePerms: [click here](https://poggit.pmmp.io/p/PurePerms)
 - PureChat: [click here](https://poggit.pmmp.io/ci/Heisenburger69/PureChat)
 
 ## Commands
